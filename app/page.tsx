@@ -15,24 +15,76 @@ import {
 } from '@mui/material';
 import { Search as SearchIcon, Warning as WarningIcon } from '@mui/icons-material';
 
+// Add interface for search results
+interface SearchResult {
+  id: string;
+  url?: string;
+  title: string;
+  description: string;
+  reportCount: number;
+  createdAt: string;
+  status: 'VERIFIED' | 'PENDING' | 'REJECTED';
+}
+
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [reportFormOpen, setReportFormOpen] = useState(false);
   const [error, setError] = useState('');
+  const [validationError, setValidationError] = useState('');
+
+  const validateSearch = (query: string): boolean => {
+    setValidationError('');
+    
+    // if (query.trim().length < 3) {
+    //   setValidationError('Search query must be at least 3 characters long');
+    //   return false;
+    // }
+
+    // // Basic URL validation if it looks like a URL
+    // if (query.includes('.') && query.includes('://')) {
+    //   try {
+    //     new URL(query);
+    //   } catch {
+    //     setValidationError('Please enter a valid URL');
+    //     return false;
+    //   }
+    // }
+
+    return true;
+  };
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setValidationError('');
+
+    if (!validateSearch(searchQuery)) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       setResults(data);
+      
+      if (data.length === 0) {
+        setError('No results found. Consider reporting this if you suspect it\'s a scam.');
+      }
     } catch (error) {
-      setError('Failed to perform search. Please try again.');
+      if (error instanceof Error) {
+        setError(`Search failed: ${error.message}`);
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
       console.error('Search failed:', error);
     } finally {
       setIsLoading(false);
@@ -67,10 +119,16 @@ export default function Home() {
           <TextField
             fullWidth
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setValidationError('');
+              setError('');
+            }}
             placeholder="Enter website URL or keywords"
             variant="outlined"
             disabled={isLoading}
+            error={!!validationError}
+            helperText={validationError}
           />
           <Button
             type="submit"
@@ -84,7 +142,10 @@ export default function Home() {
         </Box>
         
         {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
+          <Alert 
+            severity={error.includes('No results found') ? 'info' : 'error'} 
+            sx={{ mt: 2 }}
+          >
             {error}
           </Alert>
         )}

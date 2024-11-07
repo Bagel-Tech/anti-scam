@@ -13,7 +13,7 @@ services:
       MONGO_REPLICA_PORT: 27020
       INIT_WAIT_SEC: 3
     ports:
-      - 27018:27018
+      - 27020:27020
 
 volumes:
   db:

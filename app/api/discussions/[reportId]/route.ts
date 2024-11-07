@@ -1,11 +1,16 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 
-const prisma = new PrismaClient();
+interface RouteParams {
+  params: {
+    reportId: string;
+  };
+  searchParams: { [key: string]: string | string[] | undefined };
+}
 
 export async function GET(
-  request: Request,
-  { params }: { params: { reportId: string } }
+  request: NextRequest,
+  { params }: RouteParams
 ) {
   try {
     const discussions = await prisma.discussion.findMany({
@@ -25,4 +30,4 @@ export async function GET(
       { status: 500 }
     );
   }
-} 
+}
