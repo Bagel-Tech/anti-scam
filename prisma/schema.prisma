@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model ScamReport {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  url         String
+  title       String?
+  description String?
+  reportCount Int         @default(0)
+  isScam      Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  evidence    Evidence[]
+  discussions Discussion[]
+  status      ReportStatus @default(PENDING)
+
+  @@index([url])
+}
+
+model Evidence {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  scamReport   ScamReport @relation(fields: [scamReportId], references: [id])
+  scamReportId String     @db.ObjectId
+  description  String
+  imageUrls    String[]
+  createdAt    DateTime   @default(now())
+}
+
+model Discussion {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  scamReport   ScamReport @relation(fields: [scamReportId], references: [id])
+  scamReportId String     @db.ObjectId
+  message      String
+  createdAt    DateTime   @default(now())
+}
+
+enum ReportStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+} 

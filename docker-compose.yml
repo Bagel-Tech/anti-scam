@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  mongodb:
+    container_name: mongodb
+    build: ./mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: idkwealth-admin
+      MONGO_REPLICA_HOST: localhost
+      MONGO_REPLICA_PORT: 27020
+      INIT_WAIT_SEC: 3
+    ports:
+      - 27018:27018
+
+volumes:
+  db:
+    driver: local
