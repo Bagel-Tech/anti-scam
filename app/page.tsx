@@ -18,7 +18,8 @@ import { Search as SearchIcon, Warning as WarningIcon } from '@mui/icons-materia
 // Add interface for search results
 interface SearchResult {
   id: string;
-  url?: string;
+  isScam: boolean;
+  url: string;
   title: string;
   description: string;
   reportCount: number;
@@ -74,9 +75,14 @@ export default function Home() {
       }
       
       const data = await response.json();
-      setResults(data);
+      const searchResults = data as SearchResult[];
+      const results = searchResults.map(result => ({
+        ...result,
+        isScam: false  // or whatever default/calculated value is appropriate
+      }));
+      setResults(results);
       
-      if (data.length === 0) {
+      if (results.length === 0) {
         setError('No results found. Consider reporting this if you suspect it\'s a scam.');
       }
     } catch (error) {

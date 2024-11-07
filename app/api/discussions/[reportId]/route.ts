@@ -1,21 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-interface RouteParams {
-  params: {
-    reportId: string;
-  };
-  searchParams: { [key: string]: string | string[] | undefined };
-}
-
 export async function GET(
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: Promise<{ reportId: string }> }
 ) {
   try {
     const discussions = await prisma.discussion.findMany({
       where: {
-        scamReportId: params.reportId
+        scamReportId: (await params).reportId
       },
       orderBy: {
         createdAt: 'desc'
@@ -30,4 +23,4 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+} 

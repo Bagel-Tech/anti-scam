@@ -1,6 +1,5 @@
 'use client';
 import { type ReactNode } from 'react';
-import theme from '@/theme';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
